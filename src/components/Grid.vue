@@ -1,0 +1,67 @@
+<template>
+    <div :class="isActive?'active':''">
+        <flag v-if="showFlag" />
+        <mine v-if="showMine" />
+        <question-mark v-if="showQuestionMark" />
+        <digit v-if="mineAroundCount>0" :number="mineAroundCount" />
+    </div>
+</template>
+
+<script>
+import Flag from '@/components/Flag.vue';
+import Mine from '@/components/Mine.vue';
+import QuestionMark from '@/components/QuestionMark.vue';
+import Digit from '@/components/Digit.vue';
+
+export default {
+    components: {
+        Flag,
+        Mine,
+        QuestionMark,
+        Digit
+    },
+    props: {
+        isActive: {
+            type: Boolean,
+            required: true
+        },
+        content: {
+            type: String | Number,
+            required: true,
+            validator (val) {
+                const icon = [ 'flag', 'mine', 'questionmark', '' ];
+                return (val > 0 && val < 9) || icon.indexOf(val) > -1;
+            }
+        }
+    },
+    data () {
+        return {
+            showFlag: false,
+            showQuestionMark: false,
+            showMine: false,
+            mineAroundCount: -1
+        };
+    },
+    watch: {
+        content (val) {
+            this.showFlag = val === 'flag';
+            this.showQuestionMark = val === 'questionmark';
+            this.showMine = val === 'mine';
+            if (typeof val === 'number' && val > 0 && val < 9) {
+                this.mineAroundCount = val;
+            }
+        }
+    }
+};
+</script>
+
+<style scoped>
+div {
+  border: 1px solid #000;
+  padding: 25%;
+  text-align: center;
+}
+.active {
+  background-color: chocolate;
+}
+</style>
