@@ -2,7 +2,7 @@
     <div :class="isActive?'active':''">
         <flag v-if="showFlag" />
         <mine v-if="showMine" />
-        <question-mark v-if="showQuestionMark" />
+        <question-mark v-if="showQuestionMark" :color="'#FFCB10'" />
         <digit v-if="mineAroundCount>0" :number="mineAroundCount" />
     </div>
 </template>
@@ -57,11 +57,10 @@ export default {
 
 <style scoped>
 div {
-  border: 1px solid #000;
   padding: 25%;
-  text-align: center;
+  background-color: #46670a;
 }
 .active {
-  background-color: chocolate;
+  background-color: #513b20;
 }
 </style>
