@@ -1,8 +1,8 @@
 <template>
     <div class="mine-area" @contextmenu.prevent="1">
         <div class="mine-row" v-for="(col,rIndex) in area" :key="rIndex">
-            <div class="mine-col" v-for="(item,cIndex) in col" :key="cIndex">
-                <grid :isActive="item.isActive" :content="item.content" @click.native="onGridClick(rIndex,cIndex)" @contextmenu.native="onGridRightClick(rIndex,cIndex)" />
+            <div class="mine-col" v-for="(grid,cIndex) in col" :key="cIndex">
+                <grid :isActive="grid.isActive" :content="grid.content" @click.native="onGridClick(rIndex,cIndex)" @contextmenu.native="onGridRightClick(rIndex,cIndex)" />
             </div>
         </div>
     </div>
@@ -10,27 +10,6 @@
 
 <script>
 import Grid from '@/components/Grid.vue';
-
-/**
- * @param {Number} row
- * @param {Number} col
- * @param {Number} mineCount
- * @return {Array}
- */
-function createMineArea (row, col, mineCount) {
-    var coordinates = createMineCoordinates(row, col, mineCount);
-    var area = createEmptyArea(row, col);
-    for (let i = 0; i < mineCount; i++) {
-        let coor = coordinates[i];
-        let [r, c] = coor;
-        area[r][c].hasMine = true;
-        // 以该坐标为宫格中心，将周围格子的mineAroundCount +1
-        for (let grid of genAroundGrids(r, c, area)) {
-            grid.mineAroundCount++;
-        }
-    }
-    return area;
-}
 
 function * genAroundGrids (r, c, area) {
     var row = area.length;
@@ -48,50 +27,6 @@ function * genAroundGrids (r, c, area) {
             }
         }
     }
-}
-
-/**
- * @param {Number} row
- * @param {Number} col
- * @return {Array}
- */
-function createEmptyArea (row, col) {
-    var area = [];
-    for (let i = 0; i < row; i++) {
-        let tmp = [];
-        for (let j = 0; j < col; j++) {
-            tmp.push({
-                isActive: false,
-                content: '',
-                mineAroundCount: 0,
-                hasMine: false
-            });
-        }
-        area.push(tmp);
-    }
-    return area;
-}
-
-/**
- * @param {Number} row
- * @param {Number} col
- * @param {Number} mineCount
- * @return {Array}
- */
-function createMineCoordinates (row, col, mineCount) {
-    var coors = [];
-    var result = [];
-    for (let i = 0; i < row; i++) {
-        for (let j = 0; j < col; j++) {
-            coors.push(`${i},${j}`);
-        }
-    }
-    for (let i = 0; i < mineCount; i++) {
-        var index = Math.floor(Math.random() * coors.length);
-        var val = coors.splice(index, 1)[0];
-        result.push(val.split(',').map(Number));
-    }
-    return result;
 }
 
 export default {
@@ -139,7 +74,7 @@ export default {
     },
     methods: {
         setArea () {
-            this.area = createMineArea(this.row, this.col, this.mineCount);
+            this.area = this.createMineArea(this.row, this.col, this.mineCount);
         },
         onGridClick (row, col) {
             var grid = this.area[row][col];
@@ -151,7 +86,7 @@ export default {
                 // game over
                 grid.content = 'mine';
             } else if (grid.mineAroundCount === 0) {
-
+                this.spreadEmptyGrid(grid);
             } else {
                 grid.content = grid.mineAroundCount;
             }
@@ -169,6 +104,90 @@ export default {
             default:
                 grid.content = '';
                 break;
+            }
+        },
+        /**
+         * @param {Number} row
+         * @param {Number} col
+         * @return {Array}
+         */
+        createEmptyArea (row, col) {
+            var area = [];
+            for (let i = 0; i < row; i++) {
+                let grids = [];
+                for (let j = 0; j < col; j++) {
+                    grids.push({
+                        isActive: false,
+                        content: '',
+                        mineAroundCount: 0,
+                        hasMine: false,
+                        r: i,
+                        c: j
+                    });
+                }
+                area.push(grids);
+            }
+            return area;
+        },
+        /**
+         * @param {Number} row
+         * @param {Number} col
+         * @param {Number} mineCount
+         * @return {Array}
+         */
+        createMineCoordinates (row, col, mineCount) {
+            var coors = [];
+            var result = [];
+            for (let i = 0; i < row; i++) {
+                for (let j = 0; j < col; j++) {
+                    coors.push(`${i},${j}`);
+                }
+            }
+            for (let i = 0; i < mineCount; i++) {
+                var index = Math.floor(Math.random() * coors.length);
+                var val = coors.splice(index, 1)[0];
+                result.push(val.split(',').map(Number));
+            }
+            return result;
+        },
+        /**
+         * @param {Number} row
+         * @param {Number} col
+         * @param {Number} mineCount
+         * @return {Array}
+         */
+        createMineArea (row, col, mineCount) {
+            var coordinates = this.createMineCoordinates(row, col, mineCount);
+            var area = this.createEmptyArea(row, col);
+            for (let i = 0; i < mineCount; i++) {
+                let coor = coordinates[i];
+                let [r, c] = coor;
+                area[r][c].hasMine = true;
+                // 以该坐标为宫格中心，将周围格子的mineAroundCount +1
+                for (let grid of genAroundGrids(r, c, area)) {
+                    grid.mineAroundCount++;
+                }
+            }
+            return area;
+        },
+        /**
+         * 如果一个格子没有雷，且周围的雷数为0，那么激活它周围的未激活和未标志的格子
+         * @param {Object} grid
+         *
+         */
+        spreadEmptyGrid (grid) {
+            var aroundGridsIterator = genAroundGrids(grid.r, grid.c, this.area);
+            for (let item of aroundGridsIterator) {
+                if (!item.isActive && item.content === '') {
+                    // 该格子未激活，未被标识
+                    item.isActive = true;
+                    if (item.mineAroundCount === 0) {
+                        // 递归激活
+                        this.spreadEmptyGrid(item);
+                    } else {
+                        item.content = item.mineAroundCount;
+                    }
+                }
             }
         }
     }
