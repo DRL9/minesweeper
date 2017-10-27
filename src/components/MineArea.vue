@@ -55,7 +55,9 @@ export default {
     },
     data () {
         return {
-            area: []
+            area: [],
+            mineCoordinates: [],
+            gameRunning: false
         };
     },
     created () {
@@ -74,9 +76,13 @@ export default {
     },
     methods: {
         setArea () {
-            this.area = this.createMineArea(this.row, this.col, this.mineCount);
+            this.area = this.createEmptyArea(this.row, this.col);
+            this.gameRunning = true;
+            this.Mine(this.row, this.col, this.mineCount, this.area);
         },
         onGridClick (row, col) {
+            if (!this.gameRunning) return;
+
             var grid = this.area[row][col];
             if (grid.content !== '' || grid.isActive) {
                 return;
@@ -85,6 +91,7 @@ export default {
             if (grid.hasMine) {
                 // game over
                 grid.content = 'mine';
+                this.handleGameOver();
             } else if (grid.mineAroundCount === 0) {
                 this.spreadEmptyGrid(grid);
             } else {
@@ -92,6 +99,8 @@ export default {
             }
         },
         onGridRightClick (row, col) {
+            if (!this.gameRunning) return;
+
             let grid = this.area[row][col];
             if (grid.isActive) return;
             switch (grid.content) {
@@ -151,14 +160,14 @@ export default {
             return result;
         },
         /**
+         * 布雷
          * @param {Number} row
          * @param {Number} col
          * @param {Number} mineCount
-         * @return {Array}
+         * @param {Array} area
          */
-        createMineArea (row, col, mineCount) {
-            var coordinates = this.createMineCoordinates(row, col, mineCount);
-            var area = this.createEmptyArea(row, col);
+        Mine (row, col, mineCount, area) {
+            var coordinates = this.mineCoordinates = this.createMineCoordinates(row, col, mineCount);
             for (let i = 0; i < mineCount; i++) {
                 let coor = coordinates[i];
                 let [r, c] = coor;
@@ -168,7 +177,6 @@ export default {
                     grid.mineAroundCount++;
                 }
             }
-            return area;
         },
         /**
          * 如果一个格子没有雷，且周围的雷数为0，那么激活它周围的未激活和未标志的格子
@@ -189,6 +197,16 @@ export default {
                     }
                 }
             }
+        },
+        handleGameOver () {
+            this.gameRunning = false;
+            for (let coor of this.mineCoordinates) {
+                let [x, y] = coor;
+                let grid = this.area[x][y];
+                grid.content = 'mine';
+                grid.isActive = true;
+            }
+            this.$emit('gameOver');
         }
     }
 };
