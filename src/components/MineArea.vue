@@ -223,7 +223,7 @@ export default {
         },
         detectWin () {
             if (this.gridCountTotal === this.gridCountActive + this.mineCount) {
-                this.$emit('gamewin');
+                this.$emit('gameWin');
                 this.gameRunning = false;
             }
         }
