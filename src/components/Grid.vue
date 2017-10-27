@@ -8,10 +8,10 @@
 </template>
 
 <script>
-import Flag from '@/components/Flag.vue';
-import Mine from '@/components/Mine.vue';
-import QuestionMark from '@/components/QuestionMark.vue';
-import Digit from '@/components/Digit.vue';
+import Flag from '@/components/BaseFlag.vue';
+import Mine from '@/components/BaseMine.vue';
+import QuestionMark from '@/components/BaseQuestionMark.vue';
+import Digit from '@/components/BaseDigit.vue';
 
 export default {
     components: {
