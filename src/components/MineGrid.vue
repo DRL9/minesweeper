@@ -1,5 +1,5 @@
 <template>
-    <div :class="isActive?'active':''">
+    <div class="mine-grid" :class="isActive?'active':''">
         <flag v-if="showFlag" />
         <mine v-if="showMine" />
         <question-mark v-if="showQuestionMark" :color="'#FFCB10'" />
@@ -56,7 +56,7 @@ export default {
 </script>
 
 <style scoped>
-div {
+.mine-grid {
   padding: 25%;
   background-color: #46670a;
 }

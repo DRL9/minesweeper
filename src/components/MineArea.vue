@@ -2,14 +2,14 @@
     <div class="mine-area" @contextmenu.prevent="1">
         <div class="mine-row" v-for="(col,rIndex) in area" :key="rIndex">
             <div class="mine-col" v-for="(grid,cIndex) in col" :key="cIndex">
-                <grid :isActive="grid.isActive" :content="grid.content" @click.native="onGridClick(rIndex,cIndex)" @contextmenu.native="onGridRightClick(rIndex,cIndex)" />
+                <mine-grid :isActive="grid.isActive" :content="grid.content" @click.native="onGridClick(rIndex,cIndex)" @contextmenu.native="onGridRightClick(rIndex,cIndex)" />
             </div>
         </div>
     </div>
 </template>
 
 <script>
-import Grid from '@/components/Grid.vue';
+import MineGrid from '@/components/MineGrid.vue';
 
 function * genAroundGrids (r, c, area) {
     var row = area.length;
@@ -31,7 +31,7 @@ function * genAroundGrids (r, c, area) {
 
 export default {
     components: {
-        Grid
+        MineGrid
     },
     props: {
         col: {
