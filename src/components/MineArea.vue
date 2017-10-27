@@ -57,8 +57,14 @@ export default {
         return {
             area: [],
             mineCoordinates: [],
-            gameRunning: false
+            gameRunning: false,
+            gridCountActive: 0
         };
+    },
+    computed: {
+        gridCountTotal () {
+            return this.col * this.row;
+        }
     },
     created () {
         this.setArea();
@@ -87,16 +93,19 @@ export default {
             if (grid.content !== '' || grid.isActive) {
                 return;
             }
-            grid.isActive = true;
+            this.activeGrid(grid);
             if (grid.hasMine) {
                 // game over
                 grid.content = 'mine';
                 this.handleGameOver();
-            } else if (grid.mineAroundCount === 0) {
+                return;
+            }
+            if (grid.mineAroundCount === 0) {
                 this.spreadEmptyGrid(grid);
             } else {
                 grid.content = grid.mineAroundCount;
             }
+            this.detectWin();
         },
         onGridRightClick (row, col) {
             if (!this.gameRunning) return;
@@ -114,6 +123,10 @@ export default {
                 grid.content = '';
                 break;
             }
+        },
+        activeGrid (grid) {
+            grid.isActive = true;
+            this.gridCountActive++;
         },
         /**
          * @param {Number} row
@@ -188,7 +201,7 @@ export default {
             for (let item of aroundGridsIterator) {
                 if (!item.isActive && item.content === '') {
                     // 该格子未激活，未被标识
-                    item.isActive = true;
+                    this.activeGrid(item);
                     if (item.mineAroundCount === 0) {
                         // 递归激活
                         this.spreadEmptyGrid(item);
@@ -207,6 +220,12 @@ export default {
                 grid.isActive = true;
             }
             this.$emit('gameOver');
+        },
+        detectWin () {
+            if (this.gridCountTotal === this.gridCountActive + this.mineCount) {
+                this.$emit('gamewin');
+                this.gameRunning = false;
+            }
         }
     }
 };
