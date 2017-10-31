@@ -236,7 +236,7 @@ export default {
   --grid-spacing: 3%;
   --grid-spacing-keydown: 6%;
   margin: auto;
-  width: 40%;
+  max-width: 1000px;
   display: table;
 }
 .mine-row {
@@ -244,6 +244,8 @@ export default {
 }
 .mine-col {
   display: table-cell;
+  width: 50px;
+  min-width: 25px;
   position: relative;
 }
 .mine-col::before {
