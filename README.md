@@ -2,6 +2,8 @@
 
 > minesweeper game
 
+see [DEMO](https://drl9.github.io/minesweeper)
+
 ## Build Setup
 
 ``` bash
